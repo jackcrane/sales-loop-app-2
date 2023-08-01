@@ -5,15 +5,25 @@ import { StyledScrollView } from "./Page.styled";
 import Logo from "../logo";
 import Spacer from "../spacer";
 import { Container } from "../container";
+import { Row } from "../flex/Flex.styled";
+import Typography from "../typography";
+import { ThemeDebugger } from "../debuggers";
 
-const Page = ({ children }) => (
+const Page = ({ children, title, invisible = false }) => (
   <ThemeProvider theme={THEME}>
-    <SafeAreaView>
-      <Container>
-        <Logo width={175} />
-        <Spacer height={2} />
-      </Container>
-      <StyledScrollView>{children}</StyledScrollView>
+    <SafeAreaView edges={invisible ? [] : ["top", "bottom"]}>
+      {!invisible && (
+        <Container>
+          <Row justify="space-between">
+            <Logo width={175} />
+            <Typography.H2>{title}</Typography.H2>
+          </Row>
+          <Spacer height={2} />
+        </Container>
+      )}
+      <StyledScrollView invisible={invisible}>
+        <Container>{children}</Container>
+      </StyledScrollView>
     </SafeAreaView>
   </ThemeProvider>
 );

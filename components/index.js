@@ -6,3 +6,6 @@ export { default as Typography } from "./typography";
 export { default as Logo } from "./logo";
 export { default as Spacer } from "./spacer";
 export { default as TouchableOpacity } from "./touchable";
+export { default as TextInput } from "./input";
+export { default as ActionButton } from "./button";
+export { default as Feedback } from "./feedback";

@@ -12,4 +12,5 @@ export const Row = Styled.View`
 export const Column = Styled.View`
   flex-direction: column;
   gap: ${(props) => UNIT(props.gap || 1)}px;
+  justify-content: ${(props) => props.justify || null};
 `;

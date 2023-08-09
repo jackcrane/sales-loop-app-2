@@ -8,20 +8,30 @@ import { Container } from "../container";
 import { Row } from "../flex/Flex.styled";
 import Typography from "../typography";
 import { ThemeDebugger } from "../debuggers";
+import { LOGOVARIANTS } from "../logo/Logo";
+import { StatusBar } from "expo-status-bar";
 
-const Page = ({ children, title, invisible = false }) => (
+const Page = ({
+  children,
+  title,
+  invisible = false,
+  variant,
+  statusBar,
+  overscroll = true,
+}) => (
   <ThemeProvider theme={THEME}>
     <SafeAreaView edges={invisible ? [] : ["top", "bottom"]}>
+      <StatusBar style={statusBar || "dark"} />
       {!invisible && (
         <Container>
           <Row justify="space-between">
-            <Logo width={175} />
+            <Logo variant={variant} width={175} />
             <Typography.H2>{title}</Typography.H2>
           </Row>
           <Spacer height={2} />
         </Container>
       )}
-      <StyledScrollView invisible={invisible}>
+      <StyledScrollView bounces={overscroll} invisible={invisible}>
         <Container>{children}</Container>
       </StyledScrollView>
     </SafeAreaView>

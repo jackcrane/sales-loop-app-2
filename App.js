@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect, useContext, createContext } from "react";
 import { Text, View } from "react-native";
 import { NavigationContainer, ThemeProvider } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -25,6 +25,11 @@ import {
 } from "@expo-google-fonts/dm-sans";
 import { DMMono_400Regular } from "@expo-google-fonts/dm-mono";
 import { Poppins_400Regular } from "@expo-google-fonts/poppins";
+import Login from "./pages/Login";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useAccount } from "./hooks/useAccount";
+import { EventEmitter } from "eventemitter3";
+export const EventHandler = new EventEmitter();
 
 function LocalSettingsScreen() {
   return (
@@ -35,6 +40,7 @@ function LocalSettingsScreen() {
 }
 
 const Tab = createBottomTabNavigator();
+const queryClient = new QueryClient();
 
 export default function App() {
   let [fontsLoaded] = useFonts({
@@ -50,81 +56,113 @@ export default function App() {
   if (!fontsLoaded) {
     return null;
   }
+
   return (
-    <ThemeProvider theme={THEME}>
-      <SafeAreaProvider>
-        <NavigationContainer
-          theme={{
-            colors: {
-              background: "#fff",
-              card: "#fff",
-              border: "#fff",
-              text: "#000",
-              primary: "#1982C4",
-              notification: "#000",
-            },
-            dark: false,
-          }}
-        >
-          <Tab.Navigator
-            screenOptions={({ route }) => ({
-              headerShown: false,
-              tabBarIcon: ({ focused, color, size }) => {
-                switch (route.name) {
-                  case "Home":
-                    return (
-                      <House
-                        size={size}
-                        color={color}
-                        weight={focused ? "fill" : "regular"}
-                      />
-                    );
-                  case "Scan":
-                    return (
-                      <Barcode
-                        size={size}
-                        color={color}
-                        weight={focused ? "fill" : "regular"}
-                      />
-                    );
-                  case "Carts":
-                    return (
-                      <ShoppingCart
-                        size={size}
-                        color={color}
-                        weight={focused ? "fill" : "regular"}
-                      />
-                    );
-                  case "Network":
-                    return (
-                      <ShareNetwork
-                        size={size}
-                        color={color}
-                        weight={focused ? "fill" : "regular"}
-                      />
-                    );
-                  case "Other":
-                    return (
-                      <List
-                        size={size}
-                        color={color}
-                        weight={focused ? "fill" : "regular"}
-                      />
-                    );
-                  default:
-                    return <House size={size} color={color} />;
-                }
-              },
-            })}
-          >
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Scan" component={LocalSettingsScreen} />
-            <Tab.Screen name="Carts" component={LocalSettingsScreen} />
-            <Tab.Screen name="Network" component={LocalSettingsScreen} />
-            <Tab.Screen name="Other" component={SettingsNavigator} />
-          </Tab.Navigator>
-        </NavigationContainer>
-      </SafeAreaProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={THEME}>
+        <SafeAreaProvider>
+          <_App />
+        </SafeAreaProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
+
+function _App() {
+  const uar = useAccount();
+  const { isLoggedIn, user, refetch, loading } = uar;
+  useEffect(() => {
+    EventHandler.on("AUTH:UPDATE", () => {
+      console.log("AUTH:UPDATE");
+      refetch();
+    });
+  }, []);
+  useEffect(() => {
+    console.log("uar__", uar);
+  }, [uar]);
+
+  if (!isLoggedIn) {
+    return (
+      <Login
+        onLogin={() => {
+          console.log("LOGIN REQUEST FIRE");
+          refetch();
+        }}
+      />
+    );
+  }
+
+  return (
+    <NavigationContainer
+      theme={{
+        colors: {
+          background: "#fff",
+          card: "#fff",
+          border: "#fff",
+          text: "#000",
+          primary: "#1982C4",
+          notification: "#000",
+        },
+        dark: false,
+      }}
+    >
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarIcon: ({ focused, color, size }) => {
+            switch (route.name) {
+              case "Home":
+                return (
+                  <House
+                    size={size}
+                    color={color}
+                    weight={focused ? "fill" : "regular"}
+                  />
+                );
+              case "Scan":
+                return (
+                  <Barcode
+                    size={size}
+                    color={color}
+                    weight={focused ? "fill" : "regular"}
+                  />
+                );
+              case "Carts":
+                return (
+                  <ShoppingCart
+                    size={size}
+                    color={color}
+                    weight={focused ? "fill" : "regular"}
+                  />
+                );
+              case "Network":
+                return (
+                  <ShareNetwork
+                    size={size}
+                    color={color}
+                    weight={focused ? "fill" : "regular"}
+                  />
+                );
+              case "Other":
+                return (
+                  <List
+                    size={size}
+                    color={color}
+                    weight={focused ? "fill" : "regular"}
+                  />
+                );
+              default:
+                return <House size={size} color={color} />;
+            }
+          },
+        })}
+      >
+        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Scan" component={LocalSettingsScreen} />
+        <Tab.Screen name="Carts" component={LocalSettingsScreen} />
+        <Tab.Screen name="Network" component={LocalSettingsScreen} />
+        <Tab.Screen name="Other" component={SettingsNavigator} />
+      </Tab.Navigator>
+    </NavigationContainer>
   );
 }
